@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite | Smart Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .message-bubble { max-width: 85%; border-radius: 1rem; animation: pop 0.2s ease-out; }
+        @keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-tab { background-color: white; color: #f97316; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-orange-500 p-1.5 rounded-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2"/></svg>
+                </div>
+                <span class="text-xl font-bold">QuickBite <span class="text-orange-500 text-sm font-medium">Smart Indo</span></span>
+            </div>
+            
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full">
+                <button onclick="switchView('buyer')" id="btn-buyer" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all active-tab">Buyer View</button>
+                <button onclick="switchView('seller')" id="btn-seller" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-500">Seller View</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto w-full p-4 flex-1">
+        
+        <!-- BUYER VIEW SECTION -->
+        <div id="buyer-view" class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+            <div class="md:col-span-2 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[700px]">
+                <div class="p-3 border-b bg-slate-50 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-500 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
+                        Smart Assistant Online
+                    </span>
+                </div>
+
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-slate-50/30">
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-slate-200 text-slate-700 p-3 message-bubble rounded-bl-none text-sm shadow-sm font-bold">
+                            Hello! Welcome to Smart Indo.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white border-t">
+                    <form id="chat-form" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Try: 'spicy mutton fried rice' or 'medium wagyu steak'..." class="flex-1 p-3 bg-slate-100 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 transition-all">
+                        <button type="submit" class="bg-slate-900 text-white p-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 19l9-2-9-18-9 18 9-2zm0 0v-8" stroke-width="2"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-sm">Shopping Cart</h4>
+                        <span id="basket-count" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-500 font-bold">0</span>
+                    </div>
+                    <div id="cart-items" class="space-y-3 text-xs text-slate-400">
+                        Cart is empty
+                    </div>
+                    <div class="mt-4 pt-4 border-t flex justify-between items-center">
+                        <span class="font-bold text-slate-800">Total</span>
+                        <span id="cart-total" class="font-bold text-orange-600">Rp 0</span>
+                    </div>
+                    <button onclick="checkout()" class="w-full mt-4 bg-slate-900 text-white py-3 rounded-xl text-sm font-bold hover:bg-black transition-all">Order Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SELLER VIEW SECTION -->
+        <div id="seller-view" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Incoming Orders</h2>
+                        <p class="text-xs text-slate-500">Manage your customer order queue.</p>
+                    </div>
+                    <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold" id="total-orders-count">
+                        Total: 0 Orders
+                    </div>
+                </div>
+                <div id="orders-list" class="space-y-4">
+                    <div class="text-center py-20 text-slate-400 italic text-sm">No orders yet.</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const MENU = [
+            // SOUPS & LIQUIDS
+            { id: 1, name: "Spicy Complete Seblak", price: 18000, img: "🍲", cat: ["soup", "spicy", "seblak"], taste: "spicy" },
+            { id: 2, name: "Beef Tendon Meatball Soup", price: 20000, img: "🥣", cat: ["soup"], taste: "medium" },
+            { id: 3, name: "Special Chicken Porridge", price: 15000, img: "🥣", cat: ["soup", "rice", "porridge"], taste: "sweet" },
+            { id: 4, name: "Authentic Ramen", price: 35000, img: "🍜", cat: ["soup", "ramen"], taste: "medium" },
+            
+            // FRIED & GRILLED
+            { id: 5, name: "Special Fried Noodles", price: 18000, img: "🍳", cat: ["fried", "noodles"], taste: "medium" },
+            { id: 6, name: "Fried Kwetiau", price: 20000, img: "🍝", cat: ["fried", "noodles"], taste: "medium" },
+            { id: 7, name: "Jimbaran Grilled Fish", price: 45000, img: "🐟", cat: ["grilled", "fish"], taste: "spicy" },
+            { id: 8, name: "Honey Grilled Chicken", price: 25000, img: "🍗", cat: ["grilled", "chicken"], taste: "sweet" },
+
+            // FRIED RICE VARIANTS
+            { id: 9, name: "Mutton Fried Rice", price: 30000, img: "🍛", cat: ["fried rice", "fried"], taste: "spicy" },
+            { id: 10, name: "Chicken Fried Rice", price: 22000, img: "🍛", cat: ["fried rice", "fried"], taste: "medium" },
+            { id: 11, name: "Seafood Fried Rice", price: 35000, img: "🍛", cat: ["fried rice", "fried"], taste: "spicy" },
+            { id: 12, name: "Vegetarian Fried Rice", price: 20000, img: "🥗", cat: ["fried rice", "fried"], taste: "medium" },
+            { id: 13, name: "Green Chili Fried Rice (Nasi Goreng Ijo)", price: 25000, img: "🍛", cat: ["fried rice", "fried"], taste: "spicy" },
+
+            // SATE
+            { id: 14, name: "Mutton Satay (10 Skewers)", price: 45000, img: "🍢", cat: ["satay"], taste: "medium" },
+            { id: 15, name: "Madura Chicken Satay", price: 25000, img: "🍢", cat: ["satay"], taste: "sweet" },
+            { id: 16, name: "Taichan Satay", price: 22000, img: "🍡", cat: ["satay"], taste: "spicy" },
+
+            // WAGYU A5 STEAK
+            { id: 17, name: "Wagyu A5 Tenderloin (Rare)", price: 250000, img: "🥩", cat: ["steak", "wagyu", "rare"], taste: "medium" },
+            { id: 18, name: "Wagyu A5 Tenderloin (Medium)", price: 250000, img: "🥩", cat: ["steak", "wagyu", "medium"], taste: "medium" },
+            { id: 19, name: "Wagyu A5 Sirloin (Rare)", price: 220000, img: "🥩", cat: ["steak", "wagyu", "rare"], taste: "medium" },
+            { id: 20, name: "Wagyu A5 Sirloin (Medium)", price: 220000, img: "🥩", cat: ["steak", "wagyu", "medium"], taste: "medium" },
+            { id: 21, name: "Wagyu A5 Rib Eye (Rare)", price: 235000, img: "🥩", cat: ["steak", "wagyu", "rare"], taste: "medium" },
+            { id: 22, name: "Wagyu A5 Rib Eye (Medium)", price: 235000, img: "🥩", cat: ["steak", "wagyu", "medium"], taste: "medium" },
+
+            // EGGS
+            { id: 23, name: "Spicy Egg (Balado) + Rice", price: 15000, img: "🥚", cat: ["rice", "egg"], taste: "spicy" },
+            { id: 24, name: "Fried Egg + Rice", price: 12000, img: "🍳", cat: ["rice", "egg"], taste: "medium" },
+            { id: 25, name: "Special Cheese Omelet", price: 18000, img: "🍳", cat: ["egg"], taste: "medium" },
+
+            // DESSERT & SWEETS
+            { id: 26, name: "Chocolate Sweet Martabak", price: 40000, img: "🥞", cat: ["sweet", "martabak"], taste: "sweet" },
+            { id: 27, name: "Melting Chocolate Banana (Piscok)", price: 10000, img: "🍌", cat: ["sweet", "piscok"], taste: "sweet" },
+            { id: 28, name: "Chocolate Donut", price: 8000, img: "🍩", cat: ["sweet", "donut", "chocolate"], taste: "sweet" },
+            { id: 29, name: "Vanilla Donut", price: 8000, img: "🍩", cat: ["sweet", "donut", "vanilla"], taste: "sweet" },
+            { id: 30, name: "Red Velvet Donut", price: 9000, img: "🍩", cat: ["sweet", "donut", "red velvet"], taste: "sweet" },
+            { id: 31, name: "Tiramisu Donut", price: 9000, img: "🍩", cat: ["sweet", "donut", "tiramisu"], taste: "sweet" },
+            { id: 32, name: "Strawberry Donut", price: 8000, img: "🍩", cat: ["sweet", "donut", "strawberry"], taste: "sweet" },
+            { id: 33, name: "Caramel Pudding", price: 15000, img: "🍮", cat: ["sweet", "pudding"], taste: "sweet" },
+            { id: 34, name: "Fudgy Brownie", price: 25000, img: "🍰", cat: ["sweet", "brownie"], taste: "sweet" },
+            { id: 35, name: "Banana Bread", price: 20000, img: "🍞", cat: ["sweet"], taste: "sweet" },
+            { id: 36, name: "Carrot Cake", price: 22000, img: "🥕", cat: ["sweet"], taste: "sweet" },
+            { id: 37, name: "Original Churros", price: 18000, img: "🥖", cat: ["sweet"], taste: "sweet" },
+            { id: 38, name: "Macaroons (Box of 3)", price: 30000, img: "🍪", cat: ["sweet"], taste: "sweet" },
+            { id: 39, name: "Tiramisu Cake", price: 28000, img: "🍰", cat: ["sweet"], taste: "sweet" },
+
+            // DRINKS & ICE
+            { id: 40, name: "Durian Fruit Ice", price: 25000, img: "🍧", cat: ["sweet", "drink", "durian"], taste: "sweet" },
+            { id: 41, name: "Avocado Fruit Ice", price: 20000, img: "🍧", cat: ["sweet", "drink", "avocado"], taste: "sweet" },
+            { id: 42, name: "Fresh Es Teler", price: 18000, img: "🍧", cat: ["sweet", "drink"], taste: "sweet" },
+
+            // NEW MENU ITEMS
+            { id: 43, name: "Extra Spicy Ayam Geprek", price: 20000, img: "🍗", cat: ["spicy", "rice", "chicken"], taste: "spicy" },
+            { id: 44, name: "Volcano Spicy Ramen", price: 40000, img: "🍜", cat: ["ramen", "soup", "spicy"], taste: "spicy" },
+            { id: 45, name: "Spicy Beef Rendang", price: 35000, img: "🥩", cat: ["spicy", "rice"], taste: "spicy" },
+            { id: 46, name: "Soto Ayam Lamongan", price: 22000, img: "🍲", cat: ["soup", "chicken"], taste: "medium" },
+            { id: 47, name: "Rawon Beef Soup", price: 30000, img: "🥣", cat: ["soup", "beef"], taste: "medium" },
+            { id: 48, name: "Tom Yum Seafood", price: 38000, img: "🍜", cat: ["soup", "seafood"], taste: "spicy" },
+            { id: 49, name: "Chicken Skin Satay", price: 20000, img: "🍢", cat: ["satay", "chicken"], taste: "medium" },
+            { id: 50, name: "Beef Satay Special", price: 50000, img: "🍢", cat: ["satay", "beef"], taste: "medium" },
+            { id: 51, name: "Cheesecake New York", price: 32000, img: "🍰", cat: ["sweet", "cake"], taste: "sweet" },
+            { id: 52, name: "Matcha Cake", price: 30000, img: "🍵", cat: ["sweet", "cake"], taste: "sweet" },
+            { id: 53, name: "Chocolate Lava Cake", price: 35000, img: "🍫", cat: ["sweet", "cake"], taste: "sweet" },
+            { id: 54, name: "Pandan Layer Cake", price: 28000, img: "🍰", cat: ["sweet", "cake"], taste: "sweet" },
+            { id: 55, name: "Iced Thai Tea", price: 18000, img: "🧋", cat: ["drink", "sweet"], taste: "sweet" },
+            { id: 56, name: "Iced Lemon Tea", price: 15000, img: "🍋", cat: ["drink"], taste: "medium" },
+            { id: 57, name: "Mango Smoothie", price: 25000, img: "🥭", cat: ["drink", "sweet"], taste: "sweet" },
+            { id: 58, name: "Strawberry Milkshake", price: 27000, img: "🍓", cat: ["drink", "sweet"], taste: "sweet" },
+            { id: 59, name: "Cheese Burger", price: 35000, img: "🍔", cat: ["burger", "fast food"], taste: "medium" },
+            { id: 60, name: "French Fries", price: 18000, img: "🍟", cat: ["fast food"], taste: "medium" },
+            { id: 61, name: "Hotdog Classic", price: 25000, img: "🌭", cat: ["fast food"], taste: "medium" },
+            { id: 62, name: "BBQ Chicken Pizza", price: 80000, img: "🍕", cat: ["pizza"], taste: "medium" },
+            { id: 63, name: "Caesar Salad", price: 30000, img: "🥗", cat: ["healthy"], taste: "medium" },
+            { id: 64, name: "Grilled Salmon", price: 75000, img: "🐟", cat: ["healthy", "grilled"], taste: "medium" },
+            { id: 65, name: "Oatmeal with Fruits", price: 20000, img: "🥣", cat: ["healthy", "sweet"], taste: "sweet" }
+        ];
+
+        let cart = [];
+        let allOrders = [];
+
+        function switchView(view) {
+            const buyerView = document.getElementById('buyer-view');
+            const sellerView = document.getElementById('seller-view');
+            const btnBuyer = document.getElementById('btn-buyer');
+            const btnSeller = document.getElementById('btn-seller');
+
+            if (view === 'buyer') {
+                buyerView.classList.remove('hidden');
+                sellerView.classList.add('hidden');
+                btnBuyer.classList.add('active-tab', 'text-orange-600');
+                btnSeller.classList.remove('active-tab', 'text-orange-600');
+            } else {
+                buyerView.classList.add('hidden');
+                sellerView.classList.remove('hidden');
+                btnSeller.classList.add('active-tab', 'text-orange-600');
+                btnBuyer.classList.remove('active-tab', 'text-orange-600');
+                renderOrders();
+            }
+        }
+
+        function appendMsg(text, sender, items = null) {
+            const container = document.getElementById('chat-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            let html = `
+                <div class="${sender === 'user' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white border border-slate-200'} p-3 message-bubble text-sm shadow-sm font-bold">
+                    ${text}
+            `;
+
+            if(items && items.length > 0) {
+                html += `<div class="mt-3 space-y-2 max-h-60 overflow-y-auto no-scrollbar">`;
+                items.forEach(item => {
+                    html += `
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-center justify-between gap-3 font-normal">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">${item.img}</span>
+                                <div class="text-[11px]">
+                                    <div class="font-bold text-slate-800">${item.name}</div>
+                                    <div class="text-orange-600 font-bold">Rp ${item.price.toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <button onclick="buy(${item.id})" class="bg-slate-900 text-white text-[9px] px-2 py-1.5 rounded-md hover:bg-orange-500 font-bold">Buy</button>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+            html += `</div>`;
+            wrapper.innerHTML = html;
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const query = input.value.trim().toLowerCase();
+            if(!query) return;
+
+            appendMsg(input.value, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                let results = MENU.filter(item => {
+                    return item.name.toLowerCase().includes(query) || 
+                           item.cat.some(c => query.includes(c)) ||
+                           query.includes(item.taste);
+                });
+
+                if(results.length > 0) {
+                    appendMsg(`Sure! Here are some menu items matching your request:`, 'bot', results);
+                } else {
+                    appendMsg(`Sorry, I couldn't find a specific menu for "${query}". Try searching for things like 'fried rice', 'steak', or 'donut'?`, 'bot');
+                }
+            }, 600);
+        });
+
+        window.buy = function(id) {
+            const item = MENU.find(m => m.id == id);
+            cart.push(item);
+            updateCart();
+        };
+
+        function updateCart() {
+            const list = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            const countEl = document.getElementById('basket-count');
+            countEl.innerText = cart.length;
+            
+            if(cart.length === 0) {
+                list.innerHTML = "Cart is empty";
+                totalEl.innerText = "Rp 0";
+                return;
+            }
+
+            list.innerHTML = cart.map(i => `
+                <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span class="font-bold text-slate-700">${i.img} ${i.name}</span>
+                    <span class="text-orange-600 font-bold">Rp ${i.price.toLocaleString()}</span>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((s,i) => s + i.price, 0);
+            totalEl.innerText = `Rp ${total.toLocaleString()}`;
+        }
+
+        function checkout() {
+            if(cart.length === 0) return;
+            const order = {
+                id: Date.now(),
+                time: new Date().toLocaleTimeString(),
+                items: [...cart],
+                total: cart.reduce((s,i) => s + i.price, 0)
+            };
+            allOrders.unshift(order);
+            alert("Order successfully sent to the kitchen!");
+            cart = [];
+            updateCart();
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const list = document.getElementById('orders-list');
+            document.getElementById('total-orders-count').innerText = `Total: ${allOrders.length} Orders`;
+
+            if(allOrders.length === 0) {
+                list.innerHTML = `<div class="text-center py-20 text-slate-400 italic text-sm">No incoming orders yet.</div>`;
+                return;
+            }
+
+            list.innerHTML = allOrders.map(o => `
+                <div class="bg-slate-50 border p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest">ORD #${o.id.toString().slice(-4)} • ${o.time}</div>
+                        <div class="flex flex-wrap gap-1">
+                            ${o.items.map(i => `<span class="bg-white border px-2 py-0.5 rounded text-[10px] font-bold">${i.img} ${i.name}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-orange-600 mb-2 font-bold">Rp ${o.total.toLocaleString()}</div>
+                        <button onclick="finishOrder(${o.id})" class="bg-emerald-500 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold">Complete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function finishOrder(id) {
+            allOrders = allOrders.filter(o => o.id !== id);
+            renderOrders();
+        }
+    </script>
+</body>
+</html>
